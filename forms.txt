@@ -1,0 +1,16 @@
+Nancy Drew and the Hidden {noun}
+Nancy Drew and the Secret of the {noun}
+Nancy Drew and the Secret of the {adj} {noun}
+Nancy Drew and the Mystery of the {noun}
+Nancy Drew and the Mystery of the {adj} {noun}
+Nancy Drew on {adj} Island
+Nancy Drew and the {adj} {noun}
+Nancy Drew and the Missing {noun}
+Nancy Drew and the {adj} Holiday
+Nancy Drew and the Quest of the {adj} {noun}
+Nancy Drew and the Quest of the {noun}
+Nancy Drew and the Clue in the {adj} {noun}
+Nancy Drew and the Clue in the {noun}
+Nancy Drew and the {noun}'s Secret
+Nancy Drew and the Phantom of {adj} {noun}
+Nancy Drew and the Strange {noun}
