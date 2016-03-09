@@ -5,6 +5,7 @@
 #include <ctime>
 #include <sstream>
 #include <twitcurl.h>
+#include <unistd.h>
 
 int db_error(MYSQL* driver, const char* error)
 {
