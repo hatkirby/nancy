@@ -8,4 +8,4 @@ It tweets a new Nancy Drew ebook title every three hours. Currently, it uses the
 
 The bot uses [YAMLcpp](https://github.com/jbeder/yaml-cpp) to read a configuration file, MySQL C API to read the WordNet database (seeded with [this MySQL version of WordNet 2.0](androidtech.com/html/wordnet-mysql-20.php)), and [twitcurl](https://github.com/swatkat/twitcurl) to send the status updates to Twitter.
 
-The canonical furries handle is [@nancy_ebooks](https://twitter.com/nancy_ebooks).
+The canonical nancy handle is [@nancy_ebooks](https://twitter.com/nancy_ebooks).
