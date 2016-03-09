@@ -5,7 +5,7 @@ set(CMAKE_BUILD_TYPE Debug)
 
 add_subdirectory(vendor/twitcurl/libtwitcurl)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
 find_package(Mysql REQUIRED)
 
