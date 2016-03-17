@@ -1,16 +1,34 @@
 #include <yaml-cpp/yaml.h>
 #include <iostream>
-#include <mysql/mysql.h>
 #include <cstdlib>
 #include <ctime>
 #include <sstream>
 #include <twitcurl.h>
 #include <unistd.h>
+#include <verbly.h>
 
-int db_error(MYSQL* driver, const char* error)
+std::string capitalize(std::string input)
 {
-  std::cout << error << ": " << mysql_error(driver) << std::endl;
-  return 1;
+  std::string result;
+  bool capnext = true;
+  
+  for (auto ch : input)
+  {
+    if (capnext)
+    {
+      result += toupper(ch);
+      capnext = false;
+    } else {
+      result += ch;
+    }
+    
+    if ((ch == ' ') || (ch == '-'))
+    {
+      capnext = true;
+    }
+  }
+  
+  return result;
 }
 
 int main(int argc, char** argv)
@@ -18,10 +36,6 @@ int main(int argc, char** argv)
   srand(time(NULL));
   
   YAML::Node config = YAML::LoadFile("config.yml");
-  const char* host = config["host"].as<std::string>().c_str();
-  const char* user = config["user"].as<std::string>().c_str();
-  const char* pass = config["pass"].as<std::string>().c_str();
-  const char* db = config["db"].as<std::string>().c_str();
   
   // Forms
   std::vector<std::string> forms;
@@ -50,13 +64,10 @@ int main(int argc, char** argv)
     return 2;
   }
   
-  // WordNet data
-  MYSQL* driver = mysql_init(NULL);
-  if (!mysql_real_connect(driver, host, user, pass, db, 0, NULL, 0))
-  {
-    return db_error(driver, "Error connecting to database");
-  }
+  // verbly
+  verbly::data database("data.sqlite3");
   
+  // Twitter  
   twitCurl twitter;
   twitter.getOAuth().setConsumerKey(config["consumer_key"].as<std::string>());
   twitter.getOAuth().setConsumerSecret(config["consumer_secret"].as<std::string>());
@@ -73,50 +84,25 @@ int main(int argc, char** argv)
     int i;
     while ((i = form.find("{adj}")) != std::string::npos)
     {
-      const char* getword = "SELECT word FROM wn_synset WHERE ss_type = 'a' OR ss_type = 's' ORDER BY RAND() LIMIT 1";
-      if (mysql_query(driver, getword)) return db_error(driver, "Query failed");
-      MYSQL_RES* getword2 = mysql_use_result(driver); if (getword2 == NULL) return db_error(driver, "Query failed");
-      MYSQL_ROW getword3 = mysql_fetch_row(getword2); if (getword3 == NULL) return db_error(driver, "Query failed");
-      std::string adj {getword3[0]};
-      mysql_free_result(getword2);
-      
-      adj[0] = toupper(adj[0]);
-      
-      int j;
-      while ((j = adj.find("_")) != std::string::npos)
-      {
-        adj[j] = ' ';
-        adj[j+1] = toupper(adj[j+1]);
-      }
-      
-      if (adj[adj.size()-1] == ')')
-      {
-        adj.resize(adj.size()-3);
-      }
-      
-      form.replace(i, 5, adj);
+      verbly::adjective adj = database.adjectives().random(true).limit(1).run().front();
+      form.replace(i, 5, capitalize(adj.base_form()));
     }
     
     // Nouns
     while ((i = form.find("{noun}")) != std::string::npos)
     {
-      const char* getword = "SELECT word FROM wn_synset WHERE ss_type = 'n' ORDER BY RAND() LIMIT 1";
-      if (mysql_query(driver, getword)) return db_error(driver, "Query failed");
-      MYSQL_RES* getword2 = mysql_use_result(driver); if (getword2 == NULL) return db_error(driver, "Query failed");
-      MYSQL_ROW getword3 = mysql_fetch_row(getword2); if (getword3 == NULL) return db_error(driver, "Query failed");
-      std::string noun {getword3[0]};
-      mysql_free_result(getword2);
-      
-      noun[0] = toupper(noun[0]);
-      
-      int j;
-      while ((j = noun.find("_")) != std::string::npos)
+      std::string nf;
+      for (;;)
       {
-        noun[j] = ' ';
-        noun[j+1] = toupper(noun[j+1]);
+        verbly::noun n = database.nouns().is_not_proper(true).random(true).limit(1).run().front();
+        if (n.singular_form().find("genus") == std::string::npos)
+        {
+          nf = n.singular_form();
+          break;
+        }
       }
       
-      form.replace(i, 6, noun);
+      form.replace(i, 6, capitalize(nf));
     }
     
     if (form.size() > 140)
@@ -137,6 +123,4 @@ int main(int argc, char** argv)
     std::cout << "Waiting" << std::endl;
     sleep(60 * 60 * 3);
   }
-  
-  mysql_close(driver);
 }
