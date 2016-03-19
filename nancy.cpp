@@ -91,18 +91,8 @@ int main(int argc, char** argv)
     // Nouns
     while ((i = form.find("{noun}")) != std::string::npos)
     {
-      std::string nf;
-      for (;;)
-      {
-        verbly::noun n = database.nouns().is_not_proper(true).random(true).limit(1).run().front();
-        if (n.singular_form().find("genus") == std::string::npos)
-        {
-          nf = n.singular_form();
-          break;
-        }
-      }
-      
-      form.replace(i, 6, capitalize(nf));
+      verbly::noun n = database.nouns().is_not_proper(true).random(true).limit(1).run().front();
+      form.replace(i, 6, capitalize(n.singular_form()));
     }
     
     if (form.size() > 140)
