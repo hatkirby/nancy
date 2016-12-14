@@ -34,13 +34,22 @@ std::string capitalize(std::string input)
 
 int main(int argc, char** argv)
 {
+  if (argc != 2)
+  {
+    std::cout << "usage: nancy [configfile]" << std::endl;
+    return -1;
+  }
+
+  std::string configfile(argv[1]);
+  YAML::Node config = YAML::LoadFile(configfile);
+
   std::random_device random_device;
   std::mt19937 random_engine{random_device()};
   
   // Forms
   std::vector<std::string> forms;
   {
-    std::ifstream formfile("forms.txt");
+    std::ifstream formfile(config["forms"].as<std::string>());
     if (formfile.is_open())
     {
       while (!formfile.eof())
@@ -59,17 +68,15 @@ int main(int argc, char** argv)
   
   if (forms.size() == 0)
   {
-    std::cout << "No forms found... check forms.txt." << std::endl;
+    std::cout << "No forms found... check forms file." << std::endl;
     
     return 2;
   }
   
   // verbly
-  verbly::data database("data.sqlite3");
+  verbly::data database(config["verbly_datafile"].as<std::string>());
   
   // Twitter
-  YAML::Node config = YAML::LoadFile("config.yml");
-  
   twitter::auth auth;
   auth.setConsumerKey(config["consumer_key"].as<std::string>());
   auth.setConsumerSecret(config["consumer_secret"].as<std::string>());
