@@ -74,7 +74,7 @@ int main(int argc, char** argv)
   }
   
   // verbly
-  verbly::data database(config["verbly_datafile"].as<std::string>());
+  verbly::database database(config["verbly_datafile"].as<std::string>());
   
   // Twitter
   twitter::auth auth;
@@ -96,15 +96,21 @@ int main(int argc, char** argv)
     int i;
     while ((i = form.find("{adj}")) != std::string::npos)
     {
-      verbly::adjective adj = database.adjectives().random().limit(1).run().front();
-      form.replace(i, 5, capitalize(adj.base_form()));
+      verbly::word adj = database.words(verbly::notion::partOfSpeech == verbly::part_of_speech::adjective).first();
+
+      form.replace(i, 5, capitalize(adj.getBaseForm()));
     }
     
     // Nouns
     while ((i = form.find("{noun}")) != std::string::npos)
     {
-      verbly::noun n = database.nouns().is_not_proper().random().limit(1).run().front();
-      form.replace(i, 6, capitalize(n.singular_form()));
+      verbly::word n = database.words(
+        (verbly::notion::partOfSpeech == verbly::part_of_speech::noun)
+        && (verbly::form::proper == false)
+        && !(verbly::word::usageDomains %= (verbly::notion::wnid == 106718862)) // Blacklist ethnic slurs
+      ).first();
+
+      form.replace(i, 6, capitalize(n.getBaseForm()));
     }
     
     if (form.size() > 140)
