@@ -98,7 +98,7 @@ int main(int argc, char** argv)
     {
       verbly::word adj = database.words(verbly::notion::partOfSpeech == verbly::part_of_speech::adjective).first();
 
-      form.replace(i, 5, capitalize(adj.getBaseForm()));
+      form.replace(i, 5, capitalize(adj.getBaseForm().getText()));
     }
     
     // Nouns
@@ -110,7 +110,7 @@ int main(int argc, char** argv)
         && !(verbly::word::usageDomains %= (verbly::notion::wnid == 106718862)) // Blacklist ethnic slurs
       ).first();
 
-      form.replace(i, 6, capitalize(n.getBaseForm()));
+      form.replace(i, 6, capitalize(n.getBaseForm().getText()));
     }
     
     if (form.size() > 140)
